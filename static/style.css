@@ -1,0 +1,512 @@
+/* Reset and base styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Header */
+header {
+    text-align: center;
+    margin-bottom: 40px;
+    color: white;
+}
+
+header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+header p {
+    font-size: 1.2rem;
+    opacity: 0.9;
+}
+
+/* Main content layout */
+.main-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin-bottom: 40px;
+}
+
+@media (max-width: 768px) {
+    .main-content {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Card styles */
+.canvas-section, .upload-section, .results-section, .error-section, .info-section {
+    background: white;
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    transition: transform 0.3s ease;
+}
+
+.canvas-section:hover, .upload-section:hover {
+    transform: translateY(-5px);
+}
+
+.canvas-section h2, .upload-section h2, .results-section h2, .info-section h2 {
+    margin-bottom: 20px;
+    color: #4a5568;
+    font-size: 1.5rem;
+}
+
+/* Canvas styles */
+.canvas-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+#drawingCanvas {
+    border: 3px solid #e2e8f0;
+    border-radius: 10px;
+    cursor: crosshair;
+    background: #f7fafc;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.canvas-controls {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+/* Button styles */
+.btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.btn-secondary {
+    background: #e2e8f0;
+    color: #4a5568;
+}
+
+.btn-secondary:hover {
+    background: #cbd5e0;
+    transform: translateY(-2px);
+}
+
+/* File upload styles */
+.upload-container {
+    margin-bottom: 20px;
+}
+
+.file-input {
+    display: none;
+}
+
+.file-label {
+    display: inline-block;
+    padding: 15px 30px;
+    background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.file-label:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(72, 187, 120, 0.4);
+}
+
+.preview-container {
+    margin: 20px 0;
+    text-align: center;
+}
+
+.image-preview {
+    max-width: 200px;
+    max-height: 200px;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* Results section */
+.results-section {
+    grid-column: 1 / -1;
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+}
+
+.result-content {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 30px;
+    align-items: center;
+}
+
+@media (max-width: 768px) {
+    .result-content {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+}
+
+.prediction-display {
+    text-align: center;
+}
+
+.predicted-digit {
+    font-size: 4rem;
+    font-weight: bold;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.confidence {
+    font-size: 1.2rem;
+    opacity: 0.9;
+}
+
+/* Probability bars */
+.probability-bars {
+    display: grid;
+    gap: 8px;
+}
+
+.prob-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.prob-label {
+    font-weight: bold;
+    min-width: 30px;
+}
+
+.prob-bar-bg {
+    flex: 1;
+    height: 25px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+}
+
+.prob-bar-fill {
+    height: 100%;
+    background: rgba(255,255,255,0.8);
+    border-radius: 12px;
+    transition: width 0.5s ease;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 8px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: #333;
+}
+
+/* Error section */
+.error-section {
+    grid-column: 1 / -1;
+    background: linear-gradient(135deg, #fc8181 0%, #f56565 100%);
+    color: white;
+}
+
+.error-message {
+    font-size: 1.1rem;
+    text-align: center;
+    font-weight: 500;
+}
+
+/* Info section */
+.info-section {
+    grid-column: 1 / -1;
+    background: linear-gradient(135deg, #81e6d9 0%, #4fd1c7 100%);
+    color: #2d3748;
+}
+
+.model-info p {
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+/* Loading spinner */
+.loading-spinner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.7);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    color: white;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid rgba(255,255,255,0.3);
+    border-top: 5px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Footer */
+footer {
+    text-align: center;
+    color: white;
+    margin-top: 40px;
+    opacity: 0.8;
+}
+
+footer p {
+    margin-bottom: 5px;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.results-section, .error-section {
+    animation: fadeIn 0.5s ease;
+}
+
+/* Neural Network Visualization */
+.network-visualization {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    padding: 30px;
+    margin: 30px 0;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    animation: fadeIn 0.5s ease;
+}
+
+.network-visualization h2 {
+    color: #4a5568;
+    text-align: center;
+    margin-bottom: 10px;
+    font-size: 2em;
+}
+
+.viz-description {
+    text-align: center;
+    color: #718096;
+    margin-bottom: 30px;
+    font-size: 1.1em;
+}
+
+.network-layers {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.layer-section {
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 15px;
+    padding: 20px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+}
+
+.layer-section h3 {
+    color: #2d3748;
+    margin-bottom: 10px;
+    font-size: 1.3em;
+}
+
+.layer-description {
+    color: #718096;
+    margin-bottom: 15px;
+    font-style: italic;
+}
+
+.layer-stats {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 10px;
+    padding: 10px;
+    margin-bottom: 15px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9em;
+    color: #4a5568;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Neuron visualizations */
+.neuron-grid {
+    display: grid;
+    grid-template-columns: repeat(28, 1fr);
+    gap: 1px;
+    max-width: 280px;
+    margin: 0 auto;
+    background: rgba(0, 0, 0, 0.1);
+    padding: 5px;
+    border-radius: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.neuron-pixel {
+    width: 8px;
+    height: 8px;
+    border-radius: 1px;
+    transition: all 0.3s ease;
+    background: #f7fafc;
+}
+
+.neuron-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+}
+
+.neuron-item {
+    background: rgba(102, 126, 234, 0.1);
+    border-radius: 8px;
+    padding: 8px 12px;
+    border: 1px solid rgba(102, 126, 234, 0.2);
+    transition: all 0.3s ease;
+    font-size: 0.85em;
+    color: #4a5568;
+    font-family: 'Courier New', monospace;
+}
+
+.neuron-item:hover {
+    background: rgba(102, 126, 234, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 3px 10px rgba(102, 126, 234, 0.2);
+}
+
+.output-neurons {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 15px;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.output-neuron {
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 12px;
+    padding: 15px;
+    text-align: center;
+    border: 2px solid rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    color: #4a5568;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+}
+
+.output-neuron.predicted {
+    border-color: #48bb78;
+    background: rgba(72, 187, 120, 0.1);
+    box-shadow: 0 5px 20px rgba(72, 187, 120, 0.3);
+    transform: scale(1.05);
+}
+
+.output-neuron .digit {
+    font-size: 1.5em;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.output-neuron .probability {
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+.activation-bar {
+    width: 100%;
+    height: 4px;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 2px;
+    margin-top: 8px;
+    overflow: hidden;
+}
+
+.activation-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    border-radius: 2px;
+    transition: width 0.5s ease;
+}
+
+/* Responsive design for network visualization */
+@media (max-width: 768px) {
+    .network-visualization {
+        padding: 20px;
+        margin: 20px 0;
+    }
+
+    .network-layers {
+        gap: 20px;
+    }
+
+    .layer-section {
+        padding: 15px;
+    }
+
+    .neuron-grid {
+        max-width: 224px;
+        grid-template-columns: repeat(28, 1fr);
+    }
+
+    .neuron-pixel {
+        width: 6px;
+        height: 6px;
+    }
+
+    .output-neurons {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+}

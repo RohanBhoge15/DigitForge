@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neural Network Digit Recognition</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🧠 Neural Network Digit Recognition</h1>
+            <p>Draw a digit (0-9) or upload an image to test our neural network built from scratch!</p>
+        </header>
+
+        <div class="main-content">
+            <!-- Drawing Canvas Section -->
+            <div class="canvas-section">
+                <h2>✏️ Draw a Digit</h2>
+                <div class="canvas-container">
+                    <canvas id="drawingCanvas" width="280" height="280"></canvas>
+                </div>
+                <div class="canvas-controls">
+                    <button id="clearCanvas" class="btn btn-secondary">Clear Canvas</button>
+                    <button id="predictDrawing" class="btn btn-primary">Predict Drawing</button>
+                </div>
+            </div>
+
+            <!-- File Upload Section -->
+            <div class="upload-section">
+                <h2>📁 Upload Image</h2>
+                <div class="upload-container">
+                    <input type="file" id="imageUpload" accept="image/*" class="file-input">
+                    <label for="imageUpload" class="file-label">
+                        <span>Choose Image File</span>
+                    </label>
+                </div>
+                <div class="preview-container">
+                    <img id="imagePreview" class="image-preview" style="display: none;">
+                </div>
+                <button id="predictUpload" class="btn btn-primary" style="display: none;">Predict Image</button>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div class="results-section" id="resultsSection" style="display: none;">
+            <h2>🎯 Prediction Results</h2>
+            <div class="result-content">
+                <div class="prediction-display">
+                    <div class="predicted-digit" id="predictedDigit">?</div>
+                    <div class="confidence" id="confidence">Confidence: 0%</div>
+                </div>
+                <div class="probability-bars" id="probabilityBars">
+                    <!-- Probability bars will be generated here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Error Section -->
+        <div class="error-section" id="errorSection" style="display: none;">
+            <div class="error-message" id="errorMessage"></div>
+        </div>
+
+        <!-- Model Info Section -->
+        <div class="info-section">
+            <h2>ℹ️ Model Information</h2>
+            <div class="model-info" id="modelInfo">
+                <p>Loading model information...</p>
+            </div>
+        </div>
+
+        <!-- Loading Spinner -->
+        <div class="loading-spinner" id="loadingSpinner" style="display: none;">
+            <div class="spinner"></div>
+            <p>Processing...</p>
+        </div>
+
+        <!-- Neural Network Visualization -->
+        <div class="network-visualization" id="networkVisualization" style="display: none;">
+            <h2>🧠 Neural Network Visualization</h2>
+            <p class="viz-description">See how the neural network processes your digit through each layer</p>
+
+            <div class="network-layers">
+                <!-- Input Layer -->
+                <div class="layer-section">
+                    <h3>📥 Input Layer (784 neurons)</h3>
+                    <p class="layer-description">Processes the 28×28 pixel image</p>
+                    <div class="layer-stats" id="inputLayerStats"></div>
+                    <div class="neuron-grid" id="inputLayerViz"></div>
+                </div>
+
+                <!-- Hidden Layer -->
+                <div class="layer-section">
+                    <h3>🔄 Hidden Layer (64 neurons)</h3>
+                    <p class="layer-description">Extracts features and patterns from the input</p>
+                    <div class="layer-stats" id="hiddenLayerStats"></div>
+                    <div class="neuron-list" id="hiddenLayerViz"></div>
+                </div>
+
+                <!-- Output Layer -->
+                <div class="layer-section">
+                    <h3>📤 Output Layer (10 neurons)</h3>
+                    <p class="layer-description">Final digit probabilities (0-9)</p>
+                    <div class="layer-stats" id="outputLayerStats"></div>
+                    <div class="output-neurons" id="outputLayerViz"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>Built with ❤️ using NumPy, Flask, and vanilla JavaScript</p>
+        <p>Neural Network Architecture: 784 → 64 → 10 (Input → Hidden → Output)</p>
+    </footer>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
