@@ -48,9 +48,11 @@ Thumbs.db
 
 # Project specific
 trained_model.pkl
+ml_models.pkl
 *.pkl
 training_history.png
 enhanced_training_history.png
+model_comparison.png
 *.png
 *.jpg
 *.jpeg

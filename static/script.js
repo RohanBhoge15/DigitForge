@@ -43,9 +43,15 @@ function initializeEventListeners() {
     document.getElementById('clearCanvas').addEventListener('click', clearCanvas);
     document.getElementById('predictDrawing').addEventListener('click', predictDrawing);
     document.getElementById('predictUpload').addEventListener('click', predictUpload);
-    
+    document.getElementById('compareAll').addEventListener('click', compareAllModels);
+
     // File upload events
     document.getElementById('imageUpload').addEventListener('change', handleFileUpload);
+
+    // Model selection events
+    document.querySelectorAll('input[name="modelType"]').forEach(radio => {
+        radio.addEventListener('change', handleModelTypeChange);
+    });
 }
 
 // Canvas drawing functions
@@ -117,6 +123,18 @@ function handleFileUpload(e) {
     reader.readAsDataURL(file);
 }
 
+// Model selection functions
+function handleModelTypeChange() {
+    const mlSelect = document.getElementById('mlModelSelect');
+    const selectedType = document.querySelector('input[name="modelType"]:checked').value;
+
+    if (selectedType === 'ml') {
+        mlSelect.disabled = false;
+    } else {
+        mlSelect.disabled = true;
+    }
+}
+
 // Prediction functions
 async function predictDrawing() {
     const imageData = canvas.toDataURL('image/png');
@@ -148,28 +166,68 @@ async function predictUpload() {
 // Make prediction API call
 async function makePrediction(imageData) {
     showLoading();
-    
+    hideComparison();
+
+    const selectedType = document.querySelector('input[name="modelType"]:checked').value;
+    let endpoint = '/predict';
+    let requestBody = { image: imageData };
+
+    if (selectedType === 'ml') {
+        endpoint = '/predict_ml';
+        requestBody.model = document.getElementById('mlModelSelect').value;
+    }
+
     try {
-        const response = await fetch('/predict', {
+        const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestBody)
+        });
+
+        const result = await response.json();
+        hideLoading();
+
+        if (result.success) {
+            showResults(result);
+            if (result.activations && selectedType === 'custom') {
+                showNetworkVisualization(result.activations);
+            }
+        } else {
+            showError(result.error);
+        }
+
+    } catch (error) {
+        hideLoading();
+        showError('Network error: ' + error.message);
+    }
+}
+
+// Compare all models
+async function compareAllModels() {
+    const imageData = canvas.toDataURL('image/png');
+    showLoading();
+    hideResults();
+
+    try {
+        const response = await fetch('/compare_models', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({ image: imageData })
         });
-        
+
         const result = await response.json();
         hideLoading();
-        
+
         if (result.success) {
-            showResults(result);
-            if (result.activations) {
-                showNetworkVisualization(result.activations);
-            }
+            showComparison(result.results);
         } else {
             showError(result.error);
         }
-        
+
     } catch (error) {
         hideLoading();
         showError('Network error: ' + error.message);
@@ -179,15 +237,24 @@ async function makePrediction(imageData) {
 // Display results
 function showResults(result) {
     hideError();
-    
+    hideComparison();
+
     const resultsSection = document.getElementById('resultsSection');
     const predictedDigit = document.getElementById('predictedDigit');
     const confidence = document.getElementById('confidence');
+    const modelUsed = document.getElementById('modelUsed');
     const probabilityBars = document.getElementById('probabilityBars');
-    
+
     // Update prediction display
     predictedDigit.textContent = result.prediction;
     confidence.textContent = `Confidence: ${(result.confidence * 100).toFixed(1)}%`;
+
+    // Update model information
+    if (result.model_name) {
+        modelUsed.textContent = `Model: ${result.model_name} (${result.model_type || 'Custom'})`;
+    } else {
+        modelUsed.textContent = 'Model: Custom Neural Network';
+    }
     
     // Create probability bars
     probabilityBars.innerHTML = '';
@@ -201,10 +268,9 @@ function showResults(result) {
         barContainer.innerHTML = `
             <div class="prob-label">${i}</div>
             <div class="prob-bar-bg">
-                <div class="prob-bar-fill" style="width: ${percentage}%">
-                    ${percentage}%
-                </div>
+                <div class="prob-bar-fill" style="width: ${percentage}%"></div>
             </div>
+            <div class="prob-percentage">${percentage}%</div>
         `;
         
         probabilityBars.appendChild(barContainer);
@@ -384,8 +450,68 @@ function visualizeOutputLayer(outputLayer) {
     });
 }
 
+// Show comparison results
+function showComparison(results) {
+    hideError();
+    hideResults();
+
+    const comparisonSection = document.getElementById('comparisonSection');
+    const comparisonTable = document.getElementById('comparisonTable');
+
+    // Sort results by confidence
+    const sortedResults = Object.entries(results)
+        .filter(([name, result]) => !result.error)
+        .sort(([,a], [,b]) => b.confidence - a.confidence);
+
+    // Create comparison table
+    comparisonTable.innerHTML = '<h3>📊 Model Performance Comparison</h3>';
+
+    sortedResults.forEach(([modelName, result], index) => {
+        const resultDiv = document.createElement('div');
+        resultDiv.className = 'model-result';
+
+        // Highlight best and worst
+        if (index === 0) resultDiv.classList.add('best');
+        if (index === sortedResults.length - 1 && sortedResults.length > 1) {
+            resultDiv.classList.add('worst');
+        }
+
+        resultDiv.innerHTML = `
+            <div>
+                <div class="model-name">${modelName}</div>
+                <div class="model-type">${result.model_type || 'Custom'}</div>
+            </div>
+            <div>
+                <div class="model-prediction">Predicted: ${result.prediction}</div>
+                <div class="model-confidence">Confidence: ${(result.confidence * 100).toFixed(1)}%</div>
+            </div>
+        `;
+
+        comparisonTable.appendChild(resultDiv);
+    });
+
+    // Show errors if any
+    const errors = Object.entries(results).filter(([name, result]) => result.error);
+    if (errors.length > 0) {
+        const errorDiv = document.createElement('div');
+        errorDiv.innerHTML = '<h4>⚠️ Model Errors:</h4>';
+        errors.forEach(([name, result]) => {
+            errorDiv.innerHTML += `<p><strong>${name}:</strong> ${result.error}</p>`;
+        });
+        comparisonTable.appendChild(errorDiv);
+    }
+
+    comparisonSection.style.display = 'block';
+}
+
+// Hide comparison
+function hideComparison() {
+    document.getElementById('comparisonSection').style.display = 'none';
+}
+
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
     initializeCanvas();
     loadModelInfo();
+    handleModelTypeChange(); // Initialize model selection
 });

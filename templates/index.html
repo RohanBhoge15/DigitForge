@@ -9,9 +9,46 @@
 <body>
     <div class="container">
         <header>
-            <h1>🧠 Neural Network Digit Recognition</h1>
-            <p>Draw a digit (0-9) or upload an image to test our neural network built from scratch!</p>
+            <h1>🧠 Neural Network vs Professional ML</h1>
+            <p>Compare custom neural network (built from scratch) with professional ML algorithms!</p>
         </header>
+
+        <!-- Model Selection Section -->
+        <div class="model-selection">
+            <h2>🎯 Choose Your Model</h2>
+            <div class="model-options">
+                <div class="model-group">
+                    <label class="model-option">
+                        <input type="radio" name="modelType" value="custom" checked>
+                        <span class="model-label">
+                            <strong>🧠 Custom Neural Network</strong>
+                            <small>Built from scratch with NumPy</small>
+                        </span>
+                    </label>
+                </div>
+
+                <div class="model-group">
+                    <label class="model-option">
+                        <input type="radio" name="modelType" value="ml">
+                        <span class="model-label">
+                            <strong>🤖 Professional ML</strong>
+                            <small>Choose algorithm below</small>
+                        </span>
+                    </label>
+                    <select id="mlModelSelect" class="ml-select" disabled>
+                        <option value="Random Forest">Random Forest</option>
+                        <option value="SVM (RBF)">SVM with RBF Kernel</option>
+                        <option value="Gradient Boosting">Gradient Boosting</option>
+                        <option value="K-Nearest Neighbors">K-Nearest Neighbors</option>
+                        <option value="Logistic Regression">Logistic Regression</option>
+                    </select>
+                </div>
+
+                <div class="model-group">
+                    <button id="compareAll" class="btn btn-compare">🔥 Compare All Models</button>
+                </div>
+            </div>
+        </div>
 
         <div class="main-content">
             <!-- Drawing Canvas Section -->
@@ -49,9 +86,23 @@
                 <div class="prediction-display">
                     <div class="predicted-digit" id="predictedDigit">?</div>
                     <div class="confidence" id="confidence">Confidence: 0%</div>
+                    <div class="model-used" id="modelUsed">Model: Custom Neural Network</div>
                 </div>
                 <div class="probability-bars" id="probabilityBars">
                     <!-- Probability bars will be generated here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Comparison Results Section -->
+        <div class="comparison-section" id="comparisonSection" style="display: none;">
+            <h2>🔥 Model Comparison Results</h2>
+            <div class="comparison-content">
+                <div class="comparison-chart" id="comparisonChart">
+                    <!-- Comparison chart will be generated here -->
+                </div>
+                <div class="comparison-table" id="comparisonTable">
+                    <!-- Comparison table will be generated here -->
                 </div>
             </div>
         </div>

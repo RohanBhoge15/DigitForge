@@ -7,12 +7,14 @@ from PIL import Image
 import os
 import pickle
 from neural_network import NeuralNetwork
+from ml_models import MLModelComparison
 import json
 
 app = Flask(__name__)
 
-# Global variable to store the trained model
-model = None
+# Global variables to store models
+model = None  # Custom neural network
+ml_models = None  # Professional ML models
 
 def load_trained_model():
     """Load the trained neural network model"""
@@ -28,20 +30,32 @@ def load_trained_model():
             if isinstance(model_data, NeuralNetwork):
                 # New format: direct NeuralNetwork object
                 model = model_data
-                print("Model loaded successfully! (Enhanced format)")
+                print("✅ Custom Neural Network loaded successfully!")
                 return True
             else:
                 # Old format: dictionary with parameters
                 model = NeuralNetwork()
                 model.load_model(model_path)
-                print("Model loaded successfully! (Legacy format)")
+                print("✅ Custom Neural Network loaded successfully! (Legacy format)")
                 return True
 
         except Exception as e:
-            print(f"❌ Error loading model: {e}")
+            print(f"❌ Error loading custom neural network: {e}")
             return False
     else:
-        print("No trained model found. Please run train_model.py first.")
+        print("❌ No trained model found. Please run train_model.py first.")
+        return False
+
+def load_ml_models():
+    """Load professional ML models"""
+    global ml_models
+    ml_models = MLModelComparison()
+
+    if ml_models.load_models('ml_models.pkl'):
+        print("✅ Professional ML models loaded successfully!")
+        return True
+    else:
+        print("❌ No ML models found. Please run ml_models.py first.")
         return False
 
 def preprocess_image(image_data):
@@ -305,28 +319,171 @@ def model_info():
         'final_loss': model.loss_history[-1] if model.loss_history else None
     })
 
+@app.route('/predict_ml', methods=['POST'])
+def predict_ml():
+    """Make prediction using professional ML models"""
+    try:
+        if ml_models is None:
+            return jsonify({
+                'error': 'ML models not loaded. Please train ML models first.',
+                'success': False
+            })
+
+        # Get image data and model choice
+        data = request.get_json()
+        image_data = data.get('image')
+        model_choice = data.get('model', 'Random Forest')
+
+        if not image_data:
+            return jsonify({
+                'error': 'No image data provided',
+                'success': False
+            })
+
+        # Preprocess image
+        processed_image, img_array = preprocess_image(image_data)
+
+        if processed_image is None:
+            return jsonify({
+                'error': 'Failed to process image',
+                'success': False
+            })
+
+        # Check if image contains a digit
+        if not is_digit_image(img_array):
+            return jsonify({
+                'error': 'This image does not appear to contain a digit.',
+                'success': False
+            })
+
+        # Make prediction with selected ML model
+        result = ml_models.predict_single(processed_image, model_choice)
+
+        # Prepare probability distribution
+        prob_dist = {str(i): float(result['probabilities'][i]) for i in range(10)}
+
+        return jsonify({
+            'success': True,
+            'prediction': result['prediction'],
+            'confidence': result['confidence'],
+            'probabilities': prob_dist,
+            'model_name': result['model_name'],
+            'model_type': 'Professional ML'
+        })
+
+    except Exception as e:
+        print(f"Error in ML prediction: {e}")
+        return jsonify({
+            'error': f'Prediction failed: {str(e)}',
+            'success': False
+        })
+
+@app.route('/compare_models', methods=['POST'])
+def compare_models():
+    """Compare predictions from all models (custom NN + ML models)"""
+    try:
+        # Get image data
+        data = request.get_json()
+        image_data = data.get('image')
+
+        if not image_data:
+            return jsonify({
+                'error': 'No image data provided',
+                'success': False
+            })
+
+        # Preprocess image
+        processed_image, img_array = preprocess_image(image_data)
+
+        if processed_image is None:
+            return jsonify({
+                'error': 'Failed to process image',
+                'success': False
+            })
+
+        results = {}
+
+        # Custom Neural Network prediction
+        if model is not None:
+            try:
+                nn_prediction = model.predict(processed_image)[0]
+                nn_probabilities = model.predict_proba(processed_image)[0]
+                nn_confidence = float(np.max(nn_probabilities))
+
+                results['Custom Neural Network'] = {
+                    'prediction': int(nn_prediction),
+                    'confidence': nn_confidence,
+                    'probabilities': nn_probabilities.tolist(),
+                    'model_type': 'Custom Implementation'
+                }
+            except Exception as e:
+                results['Custom Neural Network'] = {'error': str(e)}
+
+        # ML Models predictions
+        if ml_models is not None:
+            try:
+                ml_results = ml_models.compare_all_models(processed_image)
+                for model_name, result in ml_results.items():
+                    if 'error' not in result:
+                        results[model_name] = {
+                            'prediction': result['prediction'],
+                            'confidence': result['confidence'],
+                            'probabilities': result['probabilities'],
+                            'model_type': 'Professional ML'
+                        }
+                    else:
+                        results[model_name] = {'error': result['error']}
+            except Exception as e:
+                print(f"Error with ML models: {e}")
+
+        return jsonify({
+            'success': True,
+            'results': results,
+            'comparison_type': 'All Models'
+        })
+
+    except Exception as e:
+        print(f"Error in model comparison: {e}")
+        return jsonify({
+            'error': f'Comparison failed: {str(e)}',
+            'success': False
+        })
+
 @app.route('/health')
 def health():
     """Health check endpoint"""
     return jsonify({
         'status': 'healthy',
-        'model_loaded': model is not None
+        'custom_model_loaded': model is not None,
+        'ml_models_loaded': ml_models is not None
     })
 
 if __name__ == '__main__':
-    print("Starting Neural Network Web Application...")
-    print("=" * 50)
+    print("Starting Enhanced Neural Network Web Application...")
+    print("=" * 60)
+
+    # Try to load the custom neural network
+    print("Loading Custom Neural Network...")
+    custom_model_loaded = load_trained_model()
+
+    # Try to load ML models
+    print("Loading Professional ML Models...")
+    ml_models_loaded = load_ml_models()
     
-    # Try to load the trained model
-    model_loaded = load_trained_model()
-    
-    if not model_loaded:
-        print("\nWARNING: No trained model found!")
-        print("Please run 'python train_model.py' first to train the model.")
-        print("The web app will start but predictions won't work until a model is trained.")
-    
-    print("\nStarting Flask server...")
-    print("Open your browser and go to: http://localhost:5000")
-    print("=" * 50)
+    # Print status summary
+    print("\n" + "="*60)
+    print("MODEL LOADING SUMMARY")
+    print("="*60)
+    print(f"Custom Neural Network: {'✅ Loaded' if custom_model_loaded else '❌ Not Found'}")
+    print(f"Professional ML Models: {'✅ Loaded' if ml_models_loaded else '❌ Not Found'}")
+
+    if not custom_model_loaded:
+        print("\n⚠️  To train custom neural network: python quick_retrain.py")
+    if not ml_models_loaded:
+        print("⚠️  To train ML models: python ml_models.py")
+
+    print("\n🚀 Starting Flask server...")
+    print("🌐 Open your browser and go to: http://localhost:5000")
+    print("="*60)
     
     app.run(debug=True, host='0.0.0.0', port=5000)
