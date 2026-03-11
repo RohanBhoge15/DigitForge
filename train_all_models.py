@@ -1,28 +1,55 @@
 #!/usr/bin/env python3
 """
 Comprehensive Training Script
-Trains both custom neural network and professional ML models for comparison
+Trains CNN, custom neural network, and professional ML models for comparison
 """
 
 import time
 import numpy as np
 from train_model import train_neural_network
 from ml_models import MLModelComparison
+from cnn_model import train_cnn_model
+from metrics_comparison import MetricsComparison
 import matplotlib.pyplot as plt
 
 def train_all_models():
     """Train all models and compare performance"""
     print("🚀 COMPREHENSIVE MODEL TRAINING")
     print("="*60)
-    print("Training both custom neural network and professional ML models")
+    print("Training CNN, custom neural network, and professional ML models")
     print("="*60)
-    
+
     results = {}
-    
-    # 1. Train Custom Neural Network
-    print("\n🧠 PHASE 1: Training Custom Neural Network")
+
+    # 1. Train CNN Model
+    print("\n🔥 PHASE 1: Training CNN Model")
     print("-" * 40)
-    
+
+    start_time = time.time()
+    try:
+        cnn_model = train_cnn_model(epochs=15, batch_size=128)
+        cnn_training_time = time.time() - start_time
+
+        results['CNN'] = {
+            'training_time': cnn_training_time,
+            'status': 'success',
+            'model': cnn_model
+        }
+
+        print(f"✅ CNN trained in {cnn_training_time:.2f}s")
+
+    except Exception as e:
+        print(f"❌ CNN training failed: {e}")
+        results['CNN'] = {
+            'training_time': 0,
+            'status': 'failed',
+            'error': str(e)
+        }
+
+    # 2. Train Custom Neural Network
+    print("\n🧠 PHASE 2: Training Custom Neural Network")
+    print("-" * 40)
+
     start_time = time.time()
     try:
         # Train with optimized parameters
@@ -34,15 +61,15 @@ def train_all_models():
             use_momentum=True
         )
         custom_training_time = time.time() - start_time
-        
+
         results['Custom Neural Network'] = {
             'training_time': custom_training_time,
             'status': 'success',
             'model': custom_model
         }
-        
+
         print(f"✅ Custom Neural Network trained in {custom_training_time:.2f}s")
-        
+
     except Exception as e:
         print(f"❌ Custom Neural Network training failed: {e}")
         results['Custom Neural Network'] = {
@@ -50,9 +77,9 @@ def train_all_models():
             'status': 'failed',
             'error': str(e)
         }
-    
-    # 2. Train Professional ML Models
-    print("\n🤖 PHASE 2: Training Professional ML Models")
+
+    # 3. Train Professional ML Models
+    print("\n🤖 PHASE 3: Training Professional ML Models")
     print("-" * 40)
     
     start_time = time.time()
@@ -81,15 +108,29 @@ def train_all_models():
             'error': str(e)
         }
     
-    # 3. Generate Performance Summary
-    print("\n📊 PHASE 3: Performance Summary")
+    # 4. Generate Performance Summary
+    print("\n📊 PHASE 4: Performance Summary")
     print("-" * 40)
-    
+
     generate_performance_report(results)
-    
+
+    # 5. Generate Comprehensive Metrics Comparison
+    print("\n📈 PHASE 5: Generating Comprehensive Metrics")
+    print("-" * 40)
+
+    try:
+        comparison = MetricsComparison()
+        comparison.generate_comparison_report()
+        print("✅ Comprehensive metrics comparison generated!")
+    except Exception as e:
+        print(f"⚠️ Could not generate metrics comparison: {e}")
+
     print("\n🎉 ALL MODELS TRAINED SUCCESSFULLY!")
-    print("You can now run the web application with full model comparison:")
-    print("python app.py")
+    print("="*60)
+    print("Next steps:")
+    print("1. Run the web application: python app.py")
+    print("2. View metrics dashboard at: http://localhost:5000/metrics_dashboard")
+    print("="*60)
 
 def generate_performance_report(results):
     """Generate a comprehensive performance report"""

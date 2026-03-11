@@ -33,17 +33,25 @@ function initializeEventListeners() {
     canvas.addEventListener('mousemove', draw);
     canvas.addEventListener('mouseup', stopDrawing);
     canvas.addEventListener('mouseout', stopDrawing);
-    
+
     // Touch events for mobile
     canvas.addEventListener('touchstart', handleTouch);
     canvas.addEventListener('touchmove', handleTouch);
     canvas.addEventListener('touchend', stopDrawing);
-    
+
     // Button events
     document.getElementById('clearCanvas').addEventListener('click', clearCanvas);
     document.getElementById('predictDrawing').addEventListener('click', predictDrawing);
     document.getElementById('predictUpload').addEventListener('click', predictUpload);
     document.getElementById('compareAll').addEventListener('click', compareAllModels);
+
+    // Metrics dashboard button
+    const viewMetricsBtn = document.getElementById('viewMetrics');
+    if (viewMetricsBtn) {
+        viewMetricsBtn.addEventListener('click', () => {
+            window.location.href = '/metrics_dashboard';
+        });
+    }
 
     // File upload events
     document.getElementById('imageUpload').addEventListener('change', handleFileUpload);
@@ -175,6 +183,8 @@ async function makePrediction(imageData) {
     if (selectedType === 'ml') {
         endpoint = '/predict_ml';
         requestBody.model = document.getElementById('mlModelSelect').value;
+    } else if (selectedType === 'cnn') {
+        endpoint = '/predict_cnn';
     }
 
     try {

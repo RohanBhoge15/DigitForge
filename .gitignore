@@ -1,4 +1,6 @@
-# Python
+# ========================================
+# Python & Environment
+# ========================================
 __pycache__/
 *.py[cod]
 *$py.class
@@ -16,12 +18,14 @@ parts/
 sdist/
 var/
 wheels/
+pip-wheel-metadata/
+share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
 MANIFEST
 
-# Virtual environments
+# Virtual Environments
 .env
 .venv
 env/
@@ -29,15 +33,19 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+.virtualenv
 
-# IDE
+# ========================================
+# IDE & Editor
+# ========================================
 .vscode/
 .idea/
+.project
+.pydevproject
+.settings/
 *.swp
 *.swo
 *~
-
-# OS
 .DS_Store
 .DS_Store?
 ._*
@@ -45,21 +53,109 @@ venv.bak/
 .Trashes
 ehthumbs.db
 Thumbs.db
+*.sublime-project
+*.sublime-workspace
+.fleet/
+.vscode-oss
 
-# Project specific
+# ========================================
+# Machine Learning Models & Data
+# ========================================
+# Trained models
 trained_model.pkl
 ml_models.pkl
+cnn_model.h5
 *.pkl
+*.h5
+*.keras
+
+# Training artifacts
 training_history.png
 enhanced_training_history.png
 model_comparison.png
+comprehensive_model_comparison.png
+sample_comparison_plot.png
 *.png
 *.jpg
 *.jpeg
 
-# Logs
-*.log
+# Metrics and comparison data
+comparison_metrics.json
+comparison_metrics.pkl
+cnn_metrics.pkl
+*_metrics.json
+*_metrics.pkl
 
-# Temporary files
+# Temporary training files
 *.tmp
 *.temp
+*.checkpoint
+
+# ========================================
+# Logs & Debugging
+# ========================================
+*.log
+*.logs
+debug.log
+error.log
+
+# TensorFlow/Keras
+.keras/
+*.pb
+*.pb.txt
+saved_models/
+checkpoints/
+
+# ========================================
+# OS Specific
+# ========================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+$RECYCLE.BIN/
+
+# ========================================
+# Jupyter Notebook
+# ========================================
+.ipynb_checkpoints/
+*.ipynb_checkpoints/
+.jupyter/
+
+# ========================================
+# MacOS
+# ========================================
+.AppleDouble
+.LSOverride
+._*
+.apdisk
+
+# ========================================
+# Windows
+# ========================================
+Thumbs.db
+ehthumbs.db
+
+# ========================================
+# Large Files (Keep these untracked)
+# ========================================
+# Dataset files
+*.csv
+data/
+datasets/
+
+# Cache
+.cache/
+*.cache
+*.pytest_cache/
+
+# ========================================
+# Project Specific (Optional outputs)
+# ========================================
+# Only uncomment if you want to ignore these too
+# .vscode/settings.json
+# config.local.json

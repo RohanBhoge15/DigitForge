@@ -37,6 +37,27 @@ header p {
     opacity: 0.9;
 }
 
+.header-buttons {
+    margin-top: 20px;
+}
+
+.btn-metrics {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    font-size: 1rem;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.btn-metrics:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+}
+
 /* Model Selection */
 .model-selection {
     background: white;

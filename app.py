@@ -8,6 +8,7 @@ import os
 import pickle
 from neural_network import NeuralNetwork
 from ml_models import MLModelComparison
+from cnn_model import CNNModel
 import json
 
 app = Flask(__name__)
@@ -15,6 +16,7 @@ app = Flask(__name__)
 # Global variables to store models
 model = None  # Custom neural network
 ml_models = None  # Professional ML models
+cnn_model = None  # CNN model
 
 def load_trained_model():
     """Load the trained neural network model"""
@@ -56,6 +58,18 @@ def load_ml_models():
         return True
     else:
         print("❌ No ML models found. Please run ml_models.py first.")
+        return False
+
+def load_cnn_model():
+    """Load CNN model"""
+    global cnn_model
+    cnn_model = CNNModel()
+
+    if cnn_model.load_model():
+        print("✅ CNN model loaded successfully!")
+        return True
+    else:
+        print("❌ No CNN model found. Please run cnn_model.py first.")
         return False
 
 def preprocess_image(image_data):
@@ -232,6 +246,11 @@ def index():
     """Serve the main page"""
     return render_template('index.html')
 
+@app.route('/metrics_dashboard')
+def metrics_dashboard():
+    """Serve the metrics comparison dashboard"""
+    return render_template('metrics.html')
+
 @app.route('/predict', methods=['POST'])
 def predict():
     """Handle prediction requests"""
@@ -378,9 +397,69 @@ def predict_ml():
             'success': False
         })
 
+@app.route('/predict_cnn', methods=['POST'])
+def predict_cnn():
+    """Make prediction using CNN model"""
+    try:
+        if cnn_model is None:
+            return jsonify({
+                'error': 'CNN model not loaded. Please train CNN model first.',
+                'success': False
+            })
+
+        # Get image data
+        data = request.get_json()
+        image_data = data.get('image')
+
+        if not image_data:
+            return jsonify({
+                'error': 'No image data provided',
+                'success': False
+            })
+
+        # Preprocess image
+        processed_image, img_array = preprocess_image(image_data)
+
+        if processed_image is None:
+            return jsonify({
+                'error': 'Failed to process image',
+                'success': False
+            })
+
+        # Check if image contains a digit
+        if not is_digit_image(img_array):
+            return jsonify({
+                'error': 'This image does not appear to contain a digit.',
+                'success': False
+            })
+
+        # Make prediction with CNN
+        prediction = cnn_model.predict(processed_image)
+        probabilities = cnn_model.predict_proba(processed_image)
+        confidence = float(np.max(probabilities))
+
+        # Prepare probability distribution
+        prob_dist = {str(i): float(probabilities[i]) for i in range(10)}
+
+        return jsonify({
+            'success': True,
+            'prediction': int(prediction),
+            'confidence': confidence,
+            'probabilities': prob_dist,
+            'model_name': 'CNN',
+            'model_type': 'Deep Learning'
+        })
+
+    except Exception as e:
+        print(f"Error in CNN prediction: {e}")
+        return jsonify({
+            'error': f'Prediction failed: {str(e)}',
+            'success': False
+        })
+
 @app.route('/compare_models', methods=['POST'])
 def compare_models():
-    """Compare predictions from all models (custom NN + ML models)"""
+    """Compare predictions from all models (custom NN + CNN + ML models)"""
     try:
         # Get image data
         data = request.get_json()
@@ -419,6 +498,22 @@ def compare_models():
             except Exception as e:
                 results['Custom Neural Network'] = {'error': str(e)}
 
+        # CNN prediction
+        if cnn_model is not None:
+            try:
+                cnn_prediction = cnn_model.predict(processed_image)
+                cnn_probabilities = cnn_model.predict_proba(processed_image)
+                cnn_confidence = float(np.max(cnn_probabilities))
+
+                results['CNN'] = {
+                    'prediction': int(cnn_prediction),
+                    'confidence': cnn_confidence,
+                    'probabilities': cnn_probabilities.tolist(),
+                    'model_type': 'Deep Learning'
+                }
+            except Exception as e:
+                results['CNN'] = {'error': str(e)}
+
         # ML Models predictions
         if ml_models is not None:
             try:
@@ -449,13 +544,36 @@ def compare_models():
             'success': False
         })
 
+@app.route('/metrics')
+def get_metrics():
+    """Get comprehensive metrics comparison"""
+    try:
+        if os.path.exists('comparison_metrics.json'):
+            with open('comparison_metrics.json', 'r') as f:
+                metrics = json.load(f)
+            return jsonify({
+                'success': True,
+                'metrics': metrics
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'error': 'Metrics not available. Please run metrics_comparison.py first.'
+            })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        })
+
 @app.route('/health')
 def health():
     """Health check endpoint"""
     return jsonify({
         'status': 'healthy',
         'custom_model_loaded': model is not None,
-        'ml_models_loaded': ml_models is not None
+        'ml_models_loaded': ml_models is not None,
+        'cnn_model_loaded': cnn_model is not None
     })
 
 if __name__ == '__main__':
@@ -469,21 +587,28 @@ if __name__ == '__main__':
     # Try to load ML models
     print("Loading Professional ML Models...")
     ml_models_loaded = load_ml_models()
-    
+
+    # Try to load CNN model
+    print("Loading CNN Model...")
+    cnn_loaded = load_cnn_model()
+
     # Print status summary
     print("\n" + "="*60)
     print("MODEL LOADING SUMMARY")
     print("="*60)
     print(f"Custom Neural Network: {'✅ Loaded' if custom_model_loaded else '❌ Not Found'}")
+    print(f"CNN Model: {'✅ Loaded' if cnn_loaded else '❌ Not Found'}")
     print(f"Professional ML Models: {'✅ Loaded' if ml_models_loaded else '❌ Not Found'}")
 
     if not custom_model_loaded:
         print("\n⚠️  To train custom neural network: python quick_retrain.py")
+    if not cnn_loaded:
+        print("⚠️  To train CNN model: python cnn_model.py")
     if not ml_models_loaded:
         print("⚠️  To train ML models: python ml_models.py")
 
     print("\n🚀 Starting Flask server...")
     print("🌐 Open your browser and go to: http://localhost:5000")
     print("="*60)
-    
+
     app.run(debug=True, host='0.0.0.0', port=5000)

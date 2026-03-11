@@ -9,8 +9,11 @@
 <body>
     <div class="container">
         <header>
-            <h1>🧠 Neural Network vs Professional ML</h1>
-            <p>Compare custom neural network (built from scratch) with professional ML algorithms!</p>
+            <h1>🧠 Neural Network vs CNN vs Professional ML</h1>
+            <p>Compare custom neural network, CNN, and professional ML algorithms!</p>
+            <div class="header-buttons">
+                <button id="viewMetrics" class="btn btn-metrics">📊 View Metrics Dashboard</button>
+            </div>
         </header>
 
         <!-- Model Selection Section -->
@@ -23,6 +26,16 @@
                         <span class="model-label">
                             <strong>🧠 Custom Neural Network</strong>
                             <small>Built from scratch with NumPy</small>
+                        </span>
+                    </label>
+                </div>
+
+                <div class="model-group">
+                    <label class="model-option">
+                        <input type="radio" name="modelType" value="cnn">
+                        <span class="model-label">
+                            <strong>🔥 CNN (Deep Learning)</strong>
+                            <small>Convolutional Neural Network</small>
                         </span>
                     </label>
                 </div>
